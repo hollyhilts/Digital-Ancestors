@@ -9,6 +9,10 @@ export type PersonaCard = {
   defaultStance: string;
   favouriteMedium: string;
   famousQuote: string;
+  /** Boundaries vs Possibilities axis */
+  quadrantBoundary: "B" | "P";
+  /** Self-Driven vs Community-Minded axis */
+  quadrantSocial: "SD" | "CM";
 };
 
 /** Hardcoded persona flip-card copy for the tracks section. */
@@ -24,6 +28,8 @@ export const PERSONAS: PersonaCard[] = [
     defaultStance: "Opt-Out",
     favouriteMedium: "Anything Analogue",
     famousQuote: '"F*ck Data Centers"',
+    quadrantBoundary: "B",
+    quadrantSocial: "SD",
   },
   {
     id: "scribe",
@@ -36,6 +42,8 @@ export const PERSONAS: PersonaCard[] = [
     defaultStance: "Cautious-Curious",
     favouriteMedium: "All of it, just no AI art please",
     famousQuote: '"Automate the boring sh*t"',
+    quadrantBoundary: "B",
+    quadrantSocial: "CM",
   },
   {
     id: "weaver",
@@ -47,7 +55,9 @@ export const PERSONAS: PersonaCard[] = [
     imageAlt: "Stylized ID portrait of the Weaver",
     defaultStance: "Tending",
     favouriteMedium: "To be defined",
-    famousQuote: "To be defined",
+    famousQuote: "Let's Grow Together",
+    quadrantBoundary: "P",
+    quadrantSocial: "CM",
   },
   {
     id: "trailblazer",
@@ -60,5 +70,7 @@ export const PERSONAS: PersonaCard[] = [
     defaultStance: "Full Send",
     favouriteMedium: "Human-Machine Collaboration",
     famousQuote: '"I\'ll try anything once"',
+    quadrantBoundary: "P",
+    quadrantSocial: "SD",
   },
 ];

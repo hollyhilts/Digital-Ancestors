@@ -5,52 +5,74 @@ import {
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
+import QRCode from "react-qr-code";
 import { copy } from "../../locales";
 import { PERSONAS, type PersonaCard } from "../../data/personas";
 import { SectionHeader } from "./SectionHeader";
 
 const SWIPE_THRESHOLD = 56;
 const DECK_SIZE = PERSONAS.length;
+const SITE_URL = "https://digitalancestorscollective.com";
 
 function wrapIndex(index: number): number {
   return ((index % DECK_SIZE) + DECK_SIZE) % DECK_SIZE;
 }
 
-function Barcode() {
+/** Deterministic 32-bit hash so each persona's barcode is stable across renders. */
+function hashSeed(seed: string): number {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) {
+    h = (Math.imul(h, 31) + seed.charCodeAt(i)) >>> 0;
+  }
+  return h;
+}
+
+function mulberry32(seed: number) {
+  let state = seed;
+  return function random() {
+    state = (state + 0x6d2b79f5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function Barcode({ seed }: { seed: string }) {
+  const random = mulberry32(hashSeed(seed));
+  const bars: { x: number; width: number }[] = [];
+  let x = 2;
+  while (x < 116) {
+    const width = 1 + random() * 2.5;
+    bars.push({ x, width });
+    x += width + 1 + random() * 2.5;
+  }
   return (
     <svg className="persona-barcode" viewBox="0 0 120 28" aria-hidden="true">
-      {[2, 5, 7, 9, 12, 14, 18, 20, 22, 26, 29, 31, 35, 38, 40, 44, 47, 49, 53, 56, 58, 62, 65, 68, 71, 75, 78, 80, 84, 87, 90, 94, 97, 100, 103, 107, 110, 113].map(
-        (x, i) => (
-          <rect
-            key={x}
-            x={x}
-            y="2"
-            width={i % 5 === 0 ? 2.5 : i % 3 === 0 ? 1.5 : 1}
-            height="24"
-            fill="currentColor"
-          />
-        ),
-      )}
+      {bars.map((bar, i) => (
+        <rect
+          key={i}
+          x={bar.x}
+          y="2"
+          width={bar.width}
+          height="24"
+          fill="currentColor"
+        />
+      ))}
     </svg>
   );
 }
 
-function QrMark() {
+function PersonaQr({ id }: { id: string }) {
   return (
-    <svg className="persona-qr" viewBox="0 0 28 28" aria-hidden="true">
-      <rect width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="3" y="3" width="8" height="8" fill="currentColor" />
-      <rect x="17" y="3" width="8" height="8" fill="currentColor" />
-      <rect x="3" y="17" width="8" height="8" fill="currentColor" />
-      <rect x="5" y="5" width="4" height="4" fill="var(--persona-paper, #f7f3ee)" />
-      <rect x="19" y="5" width="4" height="4" fill="var(--persona-paper, #f7f3ee)" />
-      <rect x="5" y="19" width="4" height="4" fill="var(--persona-paper, #f7f3ee)" />
-      <rect x="14" y="14" width="3" height="3" fill="currentColor" />
-      <rect x="18" y="14" width="2" height="2" fill="currentColor" />
-      <rect x="22" y="18" width="3" height="3" fill="currentColor" />
-      <rect x="14" y="20" width="2" height="5" fill="currentColor" />
-      <rect x="18" y="22" width="5" height="2" fill="currentColor" />
-    </svg>
+    <QRCode
+      className="persona-qr"
+      value={`${SITE_URL}/characters#${id}`}
+      size={28}
+      bgColor="transparent"
+      fgColor="currentColor"
+      level="L"
+      title={`QR code linking to the ${id} character page`}
+    />
   );
 }
 
@@ -102,15 +124,15 @@ function PersonaFlipCard({
             ) : null}
           </div>
           <div className="persona-look-bar">
-            <span>* LOOK *</span>
+            <span>{track.famousQuote}</span>
           </div>
           <div className="persona-front-identity">
             <h3 className="persona-name">{track.name}</h3>
             <p className="persona-subtitle">{track.subtitle}</p>
           </div>
           <footer className="persona-front-codes">
-            <Barcode />
-            <QrMark />
+            <Barcode seed={track.id} />
+            <PersonaQr id={track.id} />
           </footer>
         </div>
 
@@ -153,8 +175,8 @@ function PersonaFlipCard({
             <footer className="persona-back-footer">
               <div className="persona-icons" aria-hidden="true">
                 <span className="persona-icon-sq" />
-                <span className="persona-icon-ce">CE</span>
-                <span className="persona-icon-ring">W</span>
+                <span className="persona-icon-ce">{track.quadrantBoundary}</span>
+                <span className="persona-icon-ring">{track.quadrantSocial}</span>
                 <span className="persona-icon-rec">
                   <svg viewBox="0 0 18 18" width="16" height="16">
                     <path
@@ -164,7 +186,7 @@ function PersonaFlipCard({
                   </svg>
                 </span>
               </div>
-              <Barcode />
+              <Barcode seed={`${track.id}-back`} />
             </footer>
           </div>
         </div>

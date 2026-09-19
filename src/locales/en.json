@@ -8,21 +8,21 @@
   },
   "siteHeader": {
     "brandTitle": "RESPONSIBLE AI GUIDE FOR ARTISTS",
-    "brandSubtitle": "Personality quiz -> tailored how-to or resist guides",
+    "brandSubtitle": "Personality quiz & tailored how-to or resist guides",
     "menu": "Menu",
     "closeMenu": "Close menu",
     "home": "Home",
     "nav": {
       "map": "Take the quiz",
       "why": "Backstory",
-      "tracks": "Tracks",
+      "tracks": "Archetypes",
       "who": "Who it's for",
       "resources": "All resources",
       "characters": "Characters"
     }
   },
   "hero": {
-    "title": "The Story",
+    "title": "Becoming Digital Ancestors",
     "bodyBeforeProject": "People of the future are doing digital archeology, and in the same way we describe hunter gatherers, they'll also personify us. What does it mean to be a digital ancestor?",
     "bodyAfterProject": "",
     "cta": {
@@ -65,7 +65,7 @@
     }
   },
   "tracks": {
-    "kicker": "Four pathways",
+    "kicker": "The Four Archetypes",
     "title": "The Characters",
     "body": "",
     "cards": [

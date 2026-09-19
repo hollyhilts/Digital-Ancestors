@@ -855,7 +855,7 @@ h1.hero-title {
     radial-gradient(circle at 80% 90%, rgba(26, 20, 18, 0.04), transparent 40%),
     var(--persona-paper);
   border-radius: 14px;
-  border: 1.5px solid rgba(26, 20, 18, 0.22);
+  border: 1.5px solid black;
   box-shadow:
     0 14px 36px rgba(0, 0, 0, 0.08),
     inset 0 0 0 1px rgba(255, 255, 255, 0.35);
@@ -893,11 +893,12 @@ h1.hero-title {
 }
 
 /* —— Persona ID card (front) —— */
-.persona-front-meta {
+header.persona-front-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  padding: 0;
 }
 
 .persona-code {
@@ -968,7 +969,7 @@ h1.hero-title {
   justify-content: center;
   padding: 5px 8px;
   background: var(--persona-accent);
-  border: 1.5px solid var(--persona-ink);
+  /* border: 1.5px solid var(--persona-ink); */
   border-top: none;
   color: var(--persona-ink);
   font-family: var(--font-mono);
@@ -1016,7 +1017,7 @@ h1.hero-title {
 .persona-barcode {
   width: 100%;
   max-width: 140px;
-  height: 22px;
+  height: 26px;
   color: var(--persona-ink);
 }
 
@@ -1036,7 +1037,7 @@ h1.hero-title {
   justify-content: center;
   flex: 0 0 28px;
   background: var(--persona-accent);
-  border-right: 1.5px solid var(--persona-ink);
+  /* border-right: 1.5px solid var(--persona-ink); */
   font-family: var(--font-sans);
   font-size: 0.7rem;
   letter-spacing: 0.22em;
@@ -1066,6 +1067,9 @@ h1.hero-title {
 .persona-back-header .persona-front-meta {
   width: 100%;
   margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .persona-pass-label {
@@ -1141,17 +1145,19 @@ h1.hero-title {
   text-align: right;
 }
 
-.persona-back-footer {
+footer.persona-back-footer {
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding-top: 4px;
   border-top: 1px dashed rgba(26, 20, 18, 0.35);
+  margin: 0;
 }
 
 .persona-icons {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 
@@ -1186,7 +1192,7 @@ h1.hero-title {
 
 .persona-back-footer .persona-barcode {
   max-width: none;
-  height: 18px;
+  height: 26px;
 }
 
 .track-pill {
