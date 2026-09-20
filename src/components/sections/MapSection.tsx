@@ -201,7 +201,6 @@ export function MapSection({ nodes }: Props) {
       />
 
       <div className="map-shell-header">
-        <div>{copy.map.shellTitle}</div>
         <div className="map-shell-badges">
           <div className="map-shell-badge">{copy.map.badges.pan}</div>
           <div className="map-shell-badge">{copy.map.badges.zoom}</div>

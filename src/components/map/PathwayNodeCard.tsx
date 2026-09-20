@@ -55,6 +55,7 @@ export function PathwayNodeCard({
   const persona = personaId ? characterById(personaId) : null;
   const contextBlocks = persona ? [] : normalizeContext(node.context);
   const toggleLabel = contextOpen ? labels.hideResources : labels.resources;
+  const [readMorePrefix, readMoreSuffix] = labels.readMoreAbout.split("{name}");
 
   return (
     <div
@@ -67,7 +68,14 @@ export function PathwayNodeCard({
       <div className={`node node-card${persona ? " node-card-result" : ""}`}>
         {persona ? (
           <>
+            <header className="persona-front-meta">
+              <span className="persona-code">{persona.code}</span>
+              <span className="persona-stamp" aria-hidden="true">
+                DA
+              </span>
+            </header>
             <div className="result-portrait">
+              <span className="persona-portrait-label">Portrait</span>
               {persona.image ? (
                 <img
                   src={persona.image}
@@ -79,16 +87,9 @@ export function PathwayNodeCard({
               <span className="result-stamp">{node.tag ?? labels.defaultTag}</span>
             </div>
             <div className="result-body">
-              <p className="result-code">{persona.code}</p>
               <div className="node-title">{persona.name}</div>
               <p className="result-subtitle">{persona.subtitle}</p>
               <div className="node-desc">{node.desc}</div>
-              <Link
-                to={`/characters#${persona.id}`}
-                className="character-read-more"
-              >
-                {labels.readMoreAbout.replace("{name}", persona.name)}
-              </Link>
             </div>
           </>
         ) : (
@@ -144,6 +145,18 @@ export function PathwayNodeCard({
           </div>
         ) : null}
       </div>
+      {persona ? (
+        <Link
+          to={`/characters#${persona.id}`}
+          className={`character-read-more character-read-more--${persona.id}`}
+        >
+          <span className="character-read-more-line">{readMorePrefix.trim()}</span>
+          <span className="character-read-more-name">
+            {persona.name}
+            {readMoreSuffix}
+          </span>
+        </Link>
+      ) : null}
     </div>
   );
 }

@@ -64,18 +64,27 @@ function PersonaSlide({
   return (
     <div className={`character-slide-inner character-slide-inner--${character.id}`}>
       <article className="character-card" id={character.id}>
-        <div className="character-card-portrait">
-          {character.image ? (
-            <img
-              src={character.image}
-              alt={character.imageAlt}
-              width={640}
-              height={640}
-            />
-          ) : null}
+        <header className="persona-front-meta">
+          <span className="persona-code">{character.code}</span>
+          <span className="persona-stamp" aria-hidden="true">
+            DA
+          </span>
+        </header>
+        <div className="character-card-media">
+          <div className="character-card-portrait">
+            <span className="persona-portrait-label">Portrait</span>
+            {character.image ? (
+              <img
+                src={character.image}
+                alt={character.imageAlt}
+                width={640}
+                height={640}
+              />
+            ) : null}
+          </div>
+
         </div>
         <div className="character-card-body">
-          <p className="character-card-code">{character.code}</p>
           <h2 className="character-card-name">{character.name}</h2>
           <p className="character-card-sub">{character.subtitle}</p>
           {parsed.quote ? (
@@ -86,7 +95,7 @@ function PersonaSlide({
           {parsed.lensMarkdown ? (
             <MarkdownHtml markdown={parsed.lensMarkdown} className="character-lens" />
           ) : null}
-        </div>
+        </div>     
       </article>
 
       <div className="character-accordions">
@@ -118,6 +127,56 @@ function PersonaSlide({
             </div>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+const SYMBOL_COUNT = 12;
+
+/**
+ * Fixed strip of symbols down the right edge of the viewport. It lives outside
+ * the carousel (a transformed ancestor would break position: fixed) and mirrors
+ * the carousel track's transform, so it swipes in step with the cards.
+ */
+function SymbolStrip({
+  indexes,
+  deckIndex,
+  dragX,
+}: {
+  indexes: number[];
+  deckIndex: number;
+  dragX: number;
+}) {
+  return (
+    <div className="character-symbol-strip" aria-hidden="true">
+      <div
+        className={`character-carousel-track character-symbol-track${dragX !== 0 ? " is-dragging" : ""}`}
+        style={{
+          transform: `translateX(calc(${-deckIndex * 100}% + ${dragX}px))`,
+        }}
+      >
+        {indexes.map((index) => (
+          <div
+            key={index}
+            className="character-symbol-slide"
+            style={{ left: `${index * 100}%` }}
+          >
+            <div className="character-symbol-column">
+              {Array.from({ length: SYMBOL_COUNT }, (_, n) => (
+                <img
+                  key={n}
+                  src={`${import.meta.env.BASE_URL}personas/${CHARACTERS[wrapIndex(index)].id}-symbol.png`}
+                  alt=""
+                  draggable={false}
+                  onError={(event) => {
+                    event.currentTarget.style.display = "none";
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -224,6 +283,7 @@ export function CharactersPage() {
 
   return (
     <main>
+      <SymbolStrip indexes={windowIndexes} deckIndex={deckIndex} dragX={dragX} />
       <section className="section characters-page" aria-labelledby="characters-heading">
         <SectionHeader
           kicker={kicker}

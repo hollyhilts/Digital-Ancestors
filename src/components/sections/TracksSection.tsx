@@ -1,5 +1,6 @@
 import {
   useCallback,
+  useEffect,
   useRef,
   useState,
   type KeyboardEvent,
@@ -13,9 +14,36 @@ import { SectionHeader } from "./SectionHeader";
 const SWIPE_THRESHOLD = 56;
 const DECK_SIZE = PERSONAS.length;
 const SITE_URL = "https://digitalancestorscollective.com";
+const PEEK_ANIMATION_MS = 1100;
 
 function wrapIndex(index: number): number {
   return ((index % DECK_SIZE) + DECK_SIZE) % DECK_SIZE;
+}
+
+/** On touch devices (no :hover), briefly "peek" the card once it scrolls into view —
+ * the same visual hint desktop gets from hovering. */
+function useScrollPeek<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  const [isPeeking, setIsPeeking] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !window.matchMedia("(hover: none)").matches) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+        setIsPeeking(true);
+        window.setTimeout(() => setIsPeeking(false), PEEK_ANIMATION_MS);
+      },
+      { threshold: 0.5 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, isPeeking };
 }
 
 /** Deterministic 32-bit hash so each persona's barcode is stable across renders. */
@@ -47,7 +75,7 @@ function Barcode({ seed }: { seed: string }) {
     x += width + 1 + random() * 2.5;
   }
   return (
-    <svg className="persona-barcode" viewBox="0 0 120 28" aria-hidden="true">
+    <svg className="persona-barcode" viewBox="0 0 120 26" aria-hidden="true">
       {bars.map((bar, i) => (
         <rect
           key={i}
@@ -92,9 +120,12 @@ function PersonaFlipCard({
     }
   };
 
+  const { ref: peekRef, isPeeking } = useScrollPeek<HTMLElement>();
+
   return (
     <article
-      className={`track-card persona-card persona-card--${track.id}${isFlipped ? " is-flipped" : ""}`}
+      ref={peekRef}
+      className={`track-card persona-card persona-card--${track.id}${isFlipped ? " is-flipped" : ""}${isPeeking ? " is-peeking" : ""}`}
       tabIndex={0}
       role="button"
       aria-pressed={isFlipped}
@@ -137,6 +168,16 @@ function PersonaFlipCard({
         </div>
 
         <div className="track-card-face track-card-back persona-back">
+          <img
+            className="persona-back-symbol"
+            src={`${import.meta.env.BASE_URL}personas/${track.id}-symbol.png`}
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            onError={(event) => {
+              event.currentTarget.style.display = "none";
+            }}
+          />
           <aside className="persona-stance-rail" aria-hidden="true">
             <span>{track.stanceText}</span>
           </aside>

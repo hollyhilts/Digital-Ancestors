@@ -18,7 +18,7 @@
       "tracks": "Archetypes",
       "who": "Who it's for",
       "resources": "All resources",
-      "characters": "Characters"
+      "characters": "Guides"
     }
   },
   "hero": {
@@ -65,8 +65,8 @@
     }
   },
   "tracks": {
-    "kicker": "The Four Archetypes",
-    "title": "The Characters",
+    "kicker": "The Archetypes",
+    "title": "Choose your Fighter",
     "body": "",
     "cards": [
       {
@@ -150,8 +150,8 @@
     "readMoreAbout": "Read more about the {name}"
   },
   "characters": {
-    "kicker": "The four archetypes",
-    "title": "Characters",
+    "kicker": "The Guides",
+    "title": "",
     "body": "Swipe the card or use the arrows to meet each type. Open a section below to read the landscape, action plan, and resources.",
     "prev": "Previous character",
     "next": "Next character"
