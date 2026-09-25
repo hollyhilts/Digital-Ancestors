@@ -183,5 +183,12 @@
     "intro": "Built as part of the",
     "projectQuoted": "\"Digital Ancestors: Mortality, Memory, Machine\"",
     "outro": "project in collaboration with artists and responsible AI practitioners. This is a living framework (v23)."
+  },
+  "eventPopup": {
+    "title": "Come see Digital Ancestors in person",
+    "body": "Multifest @ STACKT Market in Toronto, Oct 1–8",
+    "moreInfo": "Event details",
+    "moreInfoUrl": "https://www.instagram.com/p/Ddl54zyzcPS/",
+    "close": "Close"
   }
 }

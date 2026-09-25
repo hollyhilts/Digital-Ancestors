@@ -14,6 +14,17 @@ export type SiteConfig = {
     /** Also mix in the 2 optional extra questions from the question bank. */
     includeOptionalQuestions: boolean;
   };
+  eventPopup: {
+    /** Show the "see it in person" pop-up to first-time visitors. */
+    enabled: boolean;
+    /** Stop showing it after this date (YYYY-MM-DD, end of day local time). */
+    showUntil: string;
+    /**
+     * Remembers who has already seen it. Change this (e.g. "-v2") to show
+     * the pop-up again to everyone, say for a new event.
+     */
+    storageKey: string;
+  };
 };
 
 export const siteConfig: SiteConfig = {
@@ -21,5 +32,10 @@ export const siteConfig: SiteConfig = {
     minQuestions: 6,
     maxQuestions: 8,
     includeOptionalQuestions: false,
+  },
+  eventPopup: {
+    enabled: true,
+    showUntil: "2026-10-08",
+    storageKey: "da-event-popup-stackt-2026",
   },
 };
