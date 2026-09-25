@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { copy } from "../../locales";
-import { useQuizTrail, PLOT_UNIT } from "../../hooks/useQuizTrail";
+import { useQuizTrail } from "../../hooks/useQuizTrail";
 import { SectionHeader } from "../sections/SectionHeader";
 import { MapLegend } from "../map/MapLegend";
 import { QuizMarkers, QuizPlotLayer } from "./QuizPlotLayer";
