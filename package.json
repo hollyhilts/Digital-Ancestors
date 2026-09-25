@@ -8,6 +8,7 @@
     "build": "tsc -p tsconfig.json --noEmit && vite build",
     "lint": "eslint . --max-warnings 0",
     "validate:pathway": "node scripts/validate-pathway.mjs",
+    "audit:quiz": "node scripts/audit-quiz.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -47,7 +47,7 @@ export const PERSONAS: PersonaCard[] = [
   },
   {
     id: "weaver",
-    code: "DA-04",
+    code: "DA-03",
     name: "Weaver",
     subtitle: "Gardener",
     stanceText: "TENDING",
@@ -61,7 +61,7 @@ export const PERSONAS: PersonaCard[] = [
   },
   {
     id: "trailblazer",
-    code: "DA-03",
+    code: "DA-04",
     name: "Trailblazer",
     subtitle: "Experimenter",
     stanceText: "FULL SEND",

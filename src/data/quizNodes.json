@@ -190,16 +190,16 @@
     "type": "track-admin",
     "x": -300,
     "tag": "Final Round",
-    "title": "You're behind on emails. Are you going to get help from AI?",
+    "title": "Your community is talking about shared guidelines for AI in creative practice. How do you show up?",
     "desc": "",
     "options": [
       {
-        "label": "Not for me, no.",
-        "target": "result_guardian"
+        "label": "Help shape boundaries — this affects all of us.",
+        "target": "result_scribe"
       },
       {
-        "label": "Yes, it's likely.",
-        "target": "result_scribe"
+        "label": "I'd rather manage this in my own practice.",
+        "target": "result_guardian"
       }
     ]
   },
@@ -208,19 +208,19 @@
     "type": "track-tend",
     "x": 300,
     "tag": "Final Round",
-    "title": "What do you use AI for today?",
+    "title": "What would make AI development actually work for artists as a whole?",
     "desc": "",
     "options": [
       {
-        "label": "Small stuff, minimally.",
+        "label": "Shared protections built by the field, for the field.",
         "target": "result_scribe"
       },
       {
-        "label": "Whatever I'm curious about this week.",
+        "label": "If the benefits — time, resources, reach — were distributed across the creative community.",
         "target": "result_weaver"
       },
       {
-        "label": "Nothing.",
+        "label": "Stronger individual rights to opt out.",
         "target": "result_guardian"
       }
     ]

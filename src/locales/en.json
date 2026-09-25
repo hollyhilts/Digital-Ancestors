@@ -141,6 +141,24 @@
     "aria": {
       "legend": "Track legend",
       "controls": "Map zoom controls"
+    },
+    "trail": {
+      "startTag": "Start",
+      "questionTag": "Question {n}",
+      "badgePaths": "Change an answer to take a new path",
+      "youAreHere": "You are here",
+      "axis": {
+        "boundaries": "Boundaries",
+        "possibilities": "Possibilities",
+        "us": "Us",
+        "me": "Me"
+      },
+      "changeLast": "Change my last answer",
+      "restart": "Take it again",
+      "closeCall": "Close call: you sit near the line between {a} and {b}.",
+      "mapLabel": "Quiz map",
+      "hint": "Drag to move · scroll to zoom",
+      "findMe": "Find me"
     }
   },
   "pathwayNodeCard": {
