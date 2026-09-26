@@ -2982,3 +2982,122 @@ footer {
   text-decoration: none;
   font-family: inherit;
 }
+
+/* ==========================================================================
+   Resource suggestion pop-up (src/components/feedback/ResourceSuggestionDialog.tsx)
+   Builds on the .event-popup styles above.
+   ========================================================================== */
+
+.character-share-btn {
+  margin-top: 8px;
+  font-family: inherit;
+}
+
+.resource-popup {
+  width: min(480px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+.resource-form-intro {
+  margin-bottom: 18px;
+}
+
+.resource-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+
+.resource-label {
+  padding: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.resource-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95rem;
+  resize: vertical;
+}
+
+.resource-field textarea:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+
+.resource-archetype-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.resource-archetype {
+  margin-bottom: 0;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Visually hide the checkbox; the pill shows the state. */
+.resource-archetype input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.resource-archetype.is-checked {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff6ee;
+}
+
+.resource-archetype:has(input:focus-visible) {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.resource-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.resource-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.resource-actions .btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.resource-hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.resource-error {
+  margin: 0 0 12px;
+  color: #a33;
+  font-size: 0.9rem;
+}

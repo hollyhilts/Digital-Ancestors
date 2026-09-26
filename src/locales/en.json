@@ -172,7 +172,25 @@
     "title": "",
     "body": "Swipe the card or use the arrows to meet each type. Open a section below to read the landscape, action plan, and resources.",
     "prev": "Previous character",
-    "next": "Next character"
+    "next": "Next character",
+    "shareResource": "Share a resource"
+  },
+  "resourceSuggestion": {
+    "title": "Share a resource or feedback",
+    "intro": "Know a tool, guide, or tip that belongs here? Fill in whatever you like.",
+    "linksLabel": "Suggested resource",
+    "linksPlaceholder": "Paste one or more links, one per line",
+    "notesLabel": "Notes & comments",
+    "notesPlaceholder": "What is it, and why is it useful?",
+    "archetypesLabel": "Which guides does this fit? (optional)",
+    "submit": "Send suggestion",
+    "sending": "Sending…",
+    "needOneField": "Fill in at least one field.",
+    "error": "Something went wrong and your suggestion wasn't sent. Please try again.",
+    "thanksTitle": "Thank you!",
+    "thanksBody": "We'll review your suggestion and add it to the framework if it fits.",
+    "done": "Done",
+    "close": "Close"
   },
   "resources": {
     "kicker": "Resource library",

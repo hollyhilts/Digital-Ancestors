@@ -13,6 +13,7 @@ import { SectionHeader } from "../components/sections/SectionHeader";
 import {
   CHARACTERS,
   isCharacterId,
+  type CharacterId,
   type CharacterProfile,
 } from "../data/characterProfiles";
 import {
@@ -20,6 +21,7 @@ import {
   splitPersonaMarkdown,
 } from "../utils/markdownToHtml";
 import { scrollToSection } from "../lib/scrollToSection";
+import { ResourceSuggestionDialog } from "../components/feedback/ResourceSuggestionDialog";
 
 const SWIPE_THRESHOLD = 56;
 const DECK_SIZE = CHARACTERS.length;
@@ -50,10 +52,17 @@ function MarkdownHtml({ markdown, className }: { markdown: string; className?: s
   );
 }
 
+/** The "Want to add a tip?" section gets a button that opens the suggestion form. */
+function isTipSection(title: string): boolean {
+  return /add a tip/i.test(title);
+}
+
 function PersonaSlide({
   character,
+  onShareResource,
 }: {
   character: CharacterProfile;
+  onShareResource: (guide: CharacterId) => void;
 }) {
   const parsed = useMemo(
     () => splitPersonaMarkdown(character.markdown),
@@ -122,6 +131,15 @@ function PersonaSlide({
               {open ? (
                 <div className="character-accordion-panel" id={panelId}>
                   <MarkdownHtml markdown={section.markdown} />
+                  {isTipSection(section.title) ? (
+                    <button
+                      type="button"
+                      className="btn btn-primary character-share-btn"
+                      onClick={() => onShareResource(character.id)}
+                    >
+                      {copy.characters.shareResource}
+                    </button>
+                  ) : null}
                 </div>
               ) : null}
             </div>
@@ -206,6 +224,7 @@ export function CharactersPage() {
     locked: null as "x" | "y" | null,
   });
   const [dragX, setDragX] = useState(0);
+  const [suggestFrom, setSuggestFrom] = useState<CharacterId | null>(null);
 
   const go = useCallback((step: number) => {
     if (!step) return;
@@ -229,6 +248,9 @@ export function CharactersPage() {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      // Don't flip cards while someone is typing (e.g. in the suggestion form).
+      const target = event.target as HTMLElement | null;
+      if (target?.closest("input, textarea, select, [contenteditable], dialog")) return;
       if (event.key === "ArrowLeft") go(-1);
       if (event.key === "ArrowRight") go(1);
     };
@@ -322,7 +344,10 @@ export function CharactersPage() {
                   style={{ left: `${index * 100}%` }}
                   aria-hidden={index !== deckIndex}
                 >
-                  <PersonaSlide character={CHARACTERS[wrapIndex(index)]} />
+                  <PersonaSlide
+                    character={CHARACTERS[wrapIndex(index)]}
+                    onShareResource={setSuggestFrom}
+                  />
                 </div>
               ))}
             </div>
@@ -352,6 +377,11 @@ export function CharactersPage() {
           ))}
         </div>
       </section>
+      <ResourceSuggestionDialog
+        open={suggestFrom !== null}
+        sourceGuide={suggestFrom}
+        onClose={() => setSuggestFrom(null)}
+      />
     </main>
   );
 }
