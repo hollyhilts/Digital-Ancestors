@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { copy } from "../../locales";
-import { useQuizTrail } from "../../hooks/useQuizTrail";
+import { RESULT_GAP_RATIO, useQuizTrail } from "../../hooks/useQuizTrail";
 import { SectionHeader } from "../sections/SectionHeader";
 import { MapLegend } from "../map/MapLegend";
 import { QuizMarkers, QuizPlotLayer } from "./QuizPlotLayer";
@@ -55,22 +55,43 @@ export function QuizMapSection() {
   const revealed = quiz.result !== null;
   const isDesktop = useIsDesktop(DESKTOP_MIN_WIDTH);
 
-  // Scale the reused result card (kept at its normal proportions) up until its
-  // height matches the quadrant plot's height, instead of stretching it.
+  // Scale the reused result card (kept at its normal, undistorted proportions)
+  // up until its height matches the full quadrant map's height (2x extent),
+  // instead of stretching it. Measured off the card itself, not the close-call
+  // note or change/restart buttons below it, so the card is the thing that's
+  // actually "life-size" against the quadrant. The full stack's real,
+  // now-scaled size (card + note + actions) is then reported to the trail
+  // hook so it can centre the whole thing precisely — see fitPlot.
+  //
+  // The quadrant map itself is then shrunk back down (via quadrantScale) to
+  // match the size of the card's own portrait image, so it reads as a small
+  // detail beside the "real size" card rather than competing with it.
   const resultScaleRef = useRef<HTMLDivElement>(null);
   const [resultScale, setResultScale] = useState(1);
+  const [quadrantScale, setQuadrantScale] = useState(1);
   useLayoutEffect(() => {
     const el = resultScaleRef.current;
     if (!el || !quiz.result) return;
     const measure = () => {
-      const natural = el.offsetHeight;
-      if (natural > 0) setResultScale(quiz.extent / natural);
+      const card = el.querySelector<HTMLElement>(".node-card");
+      const portrait = el.querySelector<HTMLElement>(".result-portrait");
+      const natural = card?.offsetHeight ?? 0;
+      if (natural <= 0) return;
+      const scale = (quiz.extent * 2) / natural;
+      setResultScale(scale);
+      quiz.setResultDims(el.offsetWidth * scale, el.offsetHeight * scale);
+      if (portrait?.offsetHeight) {
+        const quadScale = portrait.offsetHeight / natural;
+        setQuadrantScale(quadScale);
+        quiz.setQuadrantScale(quadScale);
+      }
+      quiz.recenter(false);
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [quiz.result, quiz.extent]);
+  }, [quiz.result, quiz.extent, quiz.setResultDims, quiz.setQuadrantScale, quiz.recenter]);
 
   // Drag to pan, wheel / pinch to zoom.
   useEffect(() => {
@@ -170,6 +191,11 @@ export function QuizMapSection() {
     "--inv": (1 / quiz.view.s).toFixed(4),
   } as CSSProperties;
 
+  // The quadrant's right edge once shrunk, plus a gap sized relative to it —
+  // must match fitPlot's own math in useQuizTrail.
+  const quadVisual = quiz.extent * 2 * quadrantScale;
+  const resultAnchorLeft = quiz.extent * quadrantScale + quadVisual * RESULT_GAP_RATIO;
+
   const { trail, controls } = copy.map;
 
   return (
@@ -199,67 +225,74 @@ export function QuizMapSection() {
             className={`qm-world${quiz.animating ? " is-animating" : ""}`}
             style={worldStyle}
           >
-            <QuizPlotLayer
-              extent={quiz.extent}
-              revealed={revealed}
-              mine={quiz.result?.position.character ?? null}
-            />
-            <svg className="qm-lines" aria-hidden="true">
-              {quiz.steps.slice(0, -1).map((from, i) => {
-                const to = quiz.steps[i + 1];
-                const length = Math.abs(to.x - from.x) + Math.abs(to.y - from.y);
+            <div
+              className="qm-map-content"
+              style={
+                isDesktop && revealed ? { transform: `scale(${quadrantScale})` } : undefined
+              }
+            >
+              <QuizPlotLayer
+                extent={quiz.extent}
+                revealed={revealed}
+                mine={quiz.result?.position.character ?? null}
+              />
+              <svg className="qm-lines" aria-hidden="true">
+                {quiz.steps.slice(0, -1).map((from, i) => {
+                  const to = quiz.steps[i + 1];
+                  const length = Math.abs(to.x - from.x) + Math.abs(to.y - from.y);
+                  return (
+                    <path
+                      key={`${from.key}>${to.key}`}
+                      className="qm-line"
+                      d={elbowPathD(from.x, from.y, to.x, to.y)}
+                      style={{ strokeDasharray: length, "--L": length } as CSSProperties}
+                    />
+                  );
+                })}
+              </svg>
+              {quiz.steps.map((step, i) => {
+                const question = quiz.rules.bank.find((q) => q.id === step.questionId);
+                if (!question) return null;
                 return (
-                  <path
-                    key={`${from.key}>${to.key}`}
-                    className="qm-line"
-                    d={elbowPathD(from.x, from.y, to.x, to.y)}
-                    style={{ strokeDasharray: length, "--L": length } as CSSProperties}
-                  />
-                );
-              })}
-            </svg>
-            {quiz.steps.map((step, i) => {
-              const question = quiz.rules.bank.find((q) => q.id === step.questionId);
-              if (!question) return null;
-              return (
-                <div key={step.key} className="qm-pos" style={{ left: step.x, top: step.y }}>
-                  <div
-                    className={`qm-card${revealed ? " is-gone" : ""}`}
-                    {...(revealed ? { inert: "" } : {})}
-                  >
-                    <div className="qm-kicker">
-                      {i === 0
-                        ? trail.startTag
-                        : trail.questionTag.replace("{n}", String(i + 1))}
-                    </div>
-                    <h3 className="qm-title">{question.title}</h3>
-                    <div className="qm-answers">
-                      {question.options.map((option, optionIndex) => (
-                        <button
-                          key={option.label}
-                          type="button"
-                          className={`qm-answer${step.selected === optionIndex ? " is-selected" : ""}`}
-                          onClick={() => quiz.choose(step.key, optionIndex)}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
+                  <div key={step.key} className="qm-pos" style={{ left: step.x, top: step.y }}>
+                    <div
+                      className={`qm-card${revealed ? " is-gone" : ""}`}
+                      {...(revealed ? { inert: "" } : {})}
+                    >
+                      <div className="qm-kicker">
+                        {i === 0
+                          ? trail.startTag
+                          : trail.questionTag.replace("{n}", String(i + 1))}
+                      </div>
+                      <h3 className="qm-title">{question.title}</h3>
+                      <div className="qm-answers">
+                        {question.options.map((option, optionIndex) => (
+                          <button
+                            key={option.label}
+                            type="button"
+                            className={`qm-answer${step.selected === optionIndex ? " is-selected" : ""}`}
+                            onClick={() => quiz.choose(step.key, optionIndex)}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-            <QuizMarkers
-              stops={quiz.steps.map((s) => ({ key: s.key, x: s.x, y: s.y }))}
-              position={quiz.result?.position ?? null}
-              revealed={revealed}
-            />
+                );
+              })}
+              <QuizMarkers
+                stops={quiz.steps.map((s) => ({ key: s.key, x: s.x, y: s.y }))}
+                position={quiz.result?.position ?? null}
+                revealed={revealed}
+              />
+            </div>
             {isDesktop && quiz.result ? (
               <div
                 className="qm-result-anchor"
                 style={{
-                  left: quiz.extent + 32,
-                  top: -quiz.extent / 2,
+                  left: resultAnchorLeft,
+                  top: -quiz.extent,
                 }}
               >
                 <div

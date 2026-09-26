@@ -90,6 +90,18 @@ export function PathwayNodeCard({
               <div className="node-title">{persona.name}</div>
               <p className="result-subtitle">{persona.subtitle}</p>
               <div className="node-desc">{node.desc}</div>
+              <Link
+                to={`/characters#${persona.id}`}
+                className={`character-read-more character-read-more--${persona.id}`}
+              >
+                <span className="character-read-more-line">
+                  {readMorePrefix.trim()}
+                </span>
+                <span className="character-read-more-name">
+                  {persona.name}
+                  {readMoreSuffix}
+                </span>
+              </Link>
             </div>
           </>
         ) : (
@@ -145,18 +157,6 @@ export function PathwayNodeCard({
           </div>
         ) : null}
       </div>
-      {persona ? (
-        <Link
-          to={`/characters#${persona.id}`}
-          className={`character-read-more character-read-more--${persona.id}`}
-        >
-          <span className="character-read-more-line">{readMorePrefix.trim()}</span>
-          <span className="character-read-more-name">
-            {persona.name}
-            {readMoreSuffix}
-          </span>
-        </Link>
-      ) : null}
     </div>
   );
 }

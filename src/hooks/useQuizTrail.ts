@@ -40,13 +40,17 @@ const COLLIDE_X = CARD_WIDTH + 50;
 const COLLIDE_Y = 380;
 const MIN_SCALE = 0.03;
 const MAX_SCALE = 2.2;
-/** The result card's width : height ratio at its normal (unscaled) proportions,
- * and the map-pixel gap beside the plot it sits in — both must match the
- * `.qm-result-anchor` / `.qm-result-scale` layout in QuizMapSection. The card
- * is scaled to the plot's height, so its width in map pixels is
- * `extent * RESULT_ASPECT`, not a fixed pixel amount. */
+/** The result card's width : height ratio at its normal (unscaled)
+ * proportions — only used by fitPlot as a rough guess for the very first
+ * frame, before the result's real size is measured and reported via
+ * setResultDims. Must match `.qm-result .node-anchor`'s max-width in
+ * global.css relative to the card's natural height. */
 const RESULT_ASPECT = 0.62;
-const RESULT_GAP = 32;
+/** Gap between the (shrunk) quadrant map and the result card, as a fraction
+ * of the quadrant's own (shrunk) size — scales with it, rather than being a
+ * flat map-pixel amount that all but disappears once the quadrant is small
+ * and the camera is zoomed out. */
+export const RESULT_GAP_RATIO = 0.35;
 const DESKTOP_MIN_WIDTH = 881;
 const REVEAL_DELAY_MS = 350;
 const RESULT_DELAY_MS = 1800;
@@ -146,6 +150,22 @@ export function useQuizTrail() {
   const resultRef = useRef(result);
   resultRef.current = result;
   const [resultVisible, setResultVisible] = useState(false);
+  /** The result's real rendered size (card + close-call note + actions, in
+   * map pixels), once QuizMapSection has measured it. Read synchronously by
+   * fitPlot, so it's a plain ref rather than state — null until measured,
+   * which fitPlot approximates around in the meantime. */
+  const resultDimsRef = useRef<{ w: number; h: number } | null>(null);
+  const setResultDims = useCallback((w: number, h: number) => {
+    resultDimsRef.current = { w, h };
+  }, []);
+  /** How much smaller the quadrant map renders than its true geometric size —
+   * ratio of the card's portrait image to the whole card, so the quadrant
+   * ends up the same size as the portrait. Read synchronously by fitPlot,
+   * like resultDimsRef; defaults to 1 (no shrink) until measured. */
+  const quadrantScaleRef = useRef(1);
+  const setQuadrantScale = useCallback((scale: number) => {
+    quadrantScaleRef.current = scale;
+  }, []);
 
   /** Same answers on the same path give the same next question. */
   const memo = useRef(new Map<string, string>());
@@ -208,8 +228,11 @@ export function useQuizTrail() {
     [baseScale, setView],
   );
 
-  /** Pull the camera back so the quadrant map and the result card (desktop:
-   * it's scaled to the plot's height and sits just right of it) both fit. */
+  /** Pull the camera back to fit the quadrant map and, on desktop, the result
+   * (card + close-call note + actions). The result sits dead centre in the
+   * viewport, at "real size"; the quadrant — shrunk to match the card's own
+   * portrait image, see setQuadrantScale — is just a small detail that fits
+   * in the space left of it, down to the viewport's edges. */
   const fitPlot = useCallback(
     (fitSteps: QuizStep[], position: QuizPosition, animate: boolean) => {
       const el = viewportRef.current;
@@ -217,14 +240,37 @@ export function useQuizTrail() {
       const rect = el.getBoundingClientRect();
       const desktop = window.innerWidth >= DESKTOP_MIN_WIDTH;
       const extent = plotExtent(fitSteps, position);
-      const resultSpan = desktop ? RESULT_GAP + extent * RESULT_ASPECT : 0;
-      const contentWidth = 2 * extent + resultSpan;
-      const s = Math.max(
-        MIN_SCALE,
-        Math.min(1, (rect.width - 40) / contentWidth, (rect.height - 40) / (2 * extent)),
-      );
-      // Centre the quadrant+card pair as a unit, quadrant on the left half.
-      setView(rect.width / 2 - (s * resultSpan) / 2, rect.height / 2, s, animate);
+      const margin = 20;
+      const quadrant = 2 * extent;
+
+      if (!desktop) {
+        // Mobile/tablet: the result renders below the map, in normal flow —
+        // just fit the quadrant square on its own, at its true size (it isn't
+        // shrunk to match the card outside of the desktop layout).
+        const s = Math.max(
+          MIN_SCALE,
+          Math.min(1, (rect.width - 2 * margin) / quadrant, (rect.height - 2 * margin) / quadrant),
+        );
+        setView(rect.width / 2, rect.height / 2, s, animate);
+        return;
+      }
+
+      // Before the result's real size is measured (see setResultDims /
+      // setQuadrantScale), fall back to an approximation: a card as tall as
+      // the quadrant, at its normal width:height ratio, quadrant unshrunk.
+      const dims = resultDimsRef.current ?? { w: quadrant * RESULT_ASPECT, h: quadrant };
+      const quadScale = quadrantScaleRef.current;
+      const quadVisual = quadrant * quadScale;
+      const gap = quadVisual * RESULT_GAP_RATIO;
+      const sWidth = (rect.width / 2 - margin) / (quadVisual + gap + dims.w / 2);
+      const sHeight = (rect.height - 2 * margin) / Math.max(quadVisual, dims.h);
+      const s = Math.max(MIN_SCALE, Math.min(1, sWidth, sHeight));
+      // The result's anchor sits at map x = extent * quadScale + gap, y =
+      // -extent (see QuizMapSection); its own centre is offset from that by
+      // half its measured size. Put that centre at the viewport's centre.
+      const resultMidX = extent * quadScale + gap + dims.w / 2;
+      const resultMidY = -extent + dims.h / 2;
+      setView(rect.width / 2 - s * resultMidX, rect.height / 2 - s * resultMidY, s, animate);
     },
     [setView],
   );
@@ -258,6 +304,7 @@ export function useQuizTrail() {
       clearScheduled();
       setResultVisible(false);
       setResult(null);
+      resultDimsRef.current = null;
 
       // A different answer replaces everything after it: one trail only.
       const kept = current
@@ -291,6 +338,7 @@ export function useQuizTrail() {
     clearScheduled();
     setResultVisible(false);
     setResult(null);
+    resultDimsRef.current = null;
     const updated = current.map((s, i) =>
       i === current.length - 1 ? { ...s, selected: null } : s,
     );
@@ -302,6 +350,7 @@ export function useQuizTrail() {
     clearScheduled();
     memo.current.clear();
     setResult(null);
+    resultDimsRef.current = null;
     setResultVisible(false);
     const first = makeStep(FIRST_QUESTION_ID, 0, 0, 0, []);
     setSteps([first]);
@@ -378,5 +427,7 @@ export function useQuizTrail() {
     changeLastAnswer,
     restart,
     recenter,
+    setResultDims,
+    setQuadrantScale,
   };
 }

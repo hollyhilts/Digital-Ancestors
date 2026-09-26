@@ -1,6 +1,8 @@
 # Digital-Ancestors
 AI Pathways for Artists: Iterative open decision-support tool for artists navigating AI choices around protection, administrative use, and co-creation.
 
+**New here?** Read [How the quiz works](docs/how-the-quiz-works.md) for a one-page overview of the scoring, question picking, and the four characters. Planned analytics: [Supabase plan](docs/supabase-plan.md).
+
 ## Legacy single-file app
 
 Download [`ai-framework-23.html`](ai-framework-23.html) and open it on your device (desktop or laptop, not mobile) to interact with it.
